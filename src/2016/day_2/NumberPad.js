@@ -7,7 +7,11 @@ module.exports = class NumberPad {
   }
 
   getCurrentNumber() {
-    return this.pad[this.currentPosition.y][this.currentPosition.x];
+    return this.getNumber(this.currentPosition);
+  }
+
+  getNumber(position) {
+    return this.pad[position.y][position.x];
   }
 
   move(char) {
@@ -31,25 +35,45 @@ module.exports = class NumberPad {
   }
 
   moveUp() {
-    if (this.currentPosition.y > 0) {
+    const newPos = {
+      x: this.currentPosition.x,
+      y: this.currentPosition.y - 1,
+    }
+
+    if (newPos.y >= 0 && this.getNumber(newPos) !== null) {
       this.currentPosition.y--;
     }
   }
 
   moveDown() {
-    if (this.currentPosition.y < this.pad.length - 1) {
+    const newPos = {
+      x: this.currentPosition.x,
+      y: this.currentPosition.y + 1,
+    }
+
+    if (newPos.y < this.pad.length && this.getNumber(newPos) !== null) {
       this.currentPosition.y++;
     }
   }
 
   moveLeft() {
-    if (this.currentPosition.x > 0) {
+    const newPos = {
+      x: this.currentPosition.x - 1,
+      y: this.currentPosition.y,
+    }
+
+    if (newPos.x >= 0 && this.getNumber(newPos) !== null) {
       this.currentPosition.x--;
     }
   }
 
   moveRight() {
-    if (this.currentPosition.x < this.pad[0].length - 1) {
+    const newPos = {
+      x: this.currentPosition.x + 1,
+      y: this.currentPosition.y,
+    }
+
+    if (newPos.x < this.pad[0].length && this.getNumber(newPos) !== null) {
       this.currentPosition.x++;
     }
   }
