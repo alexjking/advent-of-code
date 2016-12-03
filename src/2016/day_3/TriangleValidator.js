@@ -1,10 +1,8 @@
 'use strict';
 
 module.exports = class TriangleValidator {
-  constructor(array) {
-    this.sides = array.split(' ').map(function(item) {
-      return parseInt(item, 10);
-    });
+  constructor(sides) {
+    this.sides = sides;
   }
 
   isValidTriandle() {

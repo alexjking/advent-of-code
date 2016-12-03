@@ -10,6 +10,10 @@ module.exports = (input) => {
 
     line = line.replace(/\s+/g,' ').trim();
 
+    line = line.split(' ').map(function(item) {
+      return parseInt(item, 10);
+    });
+
     var validator = new TriangleValidator(line);
 
     if (validator.isValidTriandle()) {
