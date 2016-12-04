@@ -15,6 +15,29 @@ module.exports = class RoomCode {
     this.letters = this.lettersArr.join("");
   }
 
+  decrypt() {
+    const shiftNum = this.sectorId % 26;
+    const zCharCode = 'z'.charCodeAt(0);
+
+    var shiftedWords = this.lettersArr.map((word) => {
+      var newWordArr = [];
+
+      for (const ch of word) {
+        var newCharCode = ch.charCodeAt(0) + shiftNum;
+
+        if (newCharCode > zCharCode) {
+          newWordArr.push(String.fromCharCode(newCharCode - 26));
+        } else {
+          newWordArr.push(String.fromCharCode(newCharCode));
+        }
+      }
+
+      return newWordArr.join('');
+    });
+
+    return shiftedWords.join(' ');
+  }
+
   isValidRoom() {
     var charOccurrences = {};
 
