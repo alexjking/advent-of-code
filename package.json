@@ -10,6 +10,7 @@
   "author": "Alexander King <aking@factset.com>",
   "license": "ISC",
   "dependencies": {
+    "md5": "^2.2.1",
     "moment": "^2.17.0"
   }
 }
