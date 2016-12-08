@@ -34,6 +34,60 @@ module.exports = class IPAddress {
     return !abbaInHypernet;
   }
 
+  supportsSSL() {
+    // lets find all of the aba strings in the supernet sequences
+    // and then convert them to bab codes
+    const babCodes = this.getNormalSequences().map((sequence) => {
+      return this.getAbaStrings(sequence);
+    }).reduce((accumulator, seqeunceList) => {
+      return accumulator.concat(seqeunceList);
+    }, []).map((code) => {
+      return this.convertAbaToBab(code);
+    });
+
+    // if there are no bab codes to find in the hypernet sequences, return early
+    if (babCodes.length === 0) {
+      return false;
+    }
+
+    return this.getHypernetSequences().some((sequence) => {
+      return babCodes.some((babCode) => {
+        if (sequence.indexOf(babCode) > -1) {
+          return true;
+        }
+      });
+    })
+  }
+
+  convertAbaToBab(str) {
+    if (str.length !== 3) {
+      return null;
+    }
+
+    const a = str.charAt(0);
+    const b = str.charAt(1);
+
+    return b + a + b;
+  }
+
+  getAbaStrings(str) {
+     // check if this contains an abba
+    var i = 0;
+
+    var abaStrings = [];
+
+    while (i <= str.length - 3) {
+      if (str.charAt(i) === str.charAt(i + 2) &&
+          str.charAt(i) !== str.charAt(i + 1)) {
+        abaStrings.push(str.slice(i, i + 3));
+      }
+
+      i++;
+    }
+
+    return abaStrings;
+  }
+
   containsAbba(str) {
     // check if this contains an abba
     var i = 0;

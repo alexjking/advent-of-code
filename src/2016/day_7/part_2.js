@@ -6,12 +6,12 @@ module.exports = (input) => {
 
   return input.reduce((count, address) => {
     var ipAddress = new IPAddress(address);
-    if (ipAddress.supportsTls()) {
+    if (ipAddress.supportsSSL()) {
       return count + 1;
     } else {
       return count;
     }
   }, 0);
 
-  // 105
+  // 258
 }
