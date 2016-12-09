@@ -1,6 +1,9 @@
 'use strict';
 
-
+/**
+ * Recursive function to get the length of a string.
+ * We do not copy the string, we just pass indexes around to minimise the memory footprint.
+ */
 function getLength(input, startIndex, endIndex) {
   if (!input || input.length === 0 || startIndex > endIndex) {
     return 0;
@@ -12,11 +15,16 @@ function getLength(input, startIndex, endIndex) {
   while (i < endIndex) {
     const char = input.charAt(i);
 
-    if (char === '') {
+    // if the char is an empty string, just continue
+    if (char === ' ') {
       i++;
       continue;
     }
 
+    // if the current char is a paranthesis, we need to parse this as a whole string and recurse
+    // we firstly find the marker information.
+    // once we have found the marker information, we can recurse on the part of the string that we need
+    // and multiple the length of that string by the times we need to repeat it
     if (char === '(') {
       // progress the pointer to find the whole marker.
       let marker = '';
@@ -55,5 +63,5 @@ function getLength(input, startIndex, endIndex) {
 module.exports = (input) => {
   const sequence = input[0];
 
-  return getLength(sequence, 0, sequence.length);
+  return getLength(sequence, 0, sequence.length); // 11052855125
 }
