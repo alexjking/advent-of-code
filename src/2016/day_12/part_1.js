@@ -9,6 +9,11 @@ module.exports = (input) => {
     registers[name] = 0;
   });
 
+  // Part 2:
+  // register c to initialize as 1
+  // comment the following out to get part 1 solution
+  registers['c'] = 1;
+
   let getValueFromRegister = (word) => {
     if (registerNames.includes(word)) {
       return registers[word];
@@ -19,8 +24,6 @@ module.exports = (input) => {
 
   let i = 0;
   while (i < input.length) {
-    //console.log(i);
-    //console.log(registers);
     let command = input[i];
     let commandArgs = command.split(' ');
 
@@ -54,5 +57,5 @@ module.exports = (input) => {
   }
 
   console.log(registers);
-  return registers['a']; //318020
+  return registers['a']; //Part 1:318020 // Part 2: 9227674
 }
