@@ -85,7 +85,7 @@ module.exports = (input) => {
       queue.push([row - 1, col, pathLength + 1]);
     }
 
-    if (col > 1) {
+    if (col > 0) {
       queue.push([row, col - 1, pathLength + 1]);
     }
 
