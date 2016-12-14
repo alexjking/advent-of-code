@@ -121,7 +121,7 @@ function reachedFinalState(state) {
 }
 
 function serializeState(state) {
-  let serializedString = '';
+  let serializedString = 'E' + state['elevator'] + '-';
   for (let i = 0; i <= 3; i++) {
     state[i].sort(); // sorting state so that serialization will be the same regardless of order
     serializedString += 'F' + i;
@@ -140,9 +140,10 @@ module.exports = (input) => {
   let stateQueue = [];
   stateQueue.push(initialState);
 
-  while (queue.length > 0) {
+  while (stateQueue.length > 0) {
     // take the current state.
     let currentState = stateQueue.shift();
+
 
     // check if we've reached our final state (return early)
     if (reachedFinalState(currentState)) {
@@ -159,9 +160,14 @@ module.exports = (input) => {
       stateCache[serializedState] = true;
     }
 
+    console.log(currentState);
+    console.log('');
+    console.log('');
+
+
     // if we haven't reached the final state
     // get all possible next states
     let possibleNextStates = getPossibleNextStates(currentState);
-    queue.push.apply(queue, possibleNextStates);
+    stateQueue.push.apply(stateQueue, possibleNextStates);
   }
 }
