@@ -9,7 +9,21 @@ initialState['elevator'] = 0;
 initialState['steps'] = 0;
 
 function getItemPermutations(state) {
-  return {};
+  // get current floor
+  let currentFloor = state[state['elevator']];
+
+  // now get item permutations (1 or 2 items a time)
+  let itemPermutations = [];
+
+  for (let i = 0; i < currentFloor.length; i++) {
+    itemPermutations.push([currentFloor[i]]);
+
+    for (let j = i + 1; j < currentFloor.length; j++) {
+      itemPermutations.push([currentFloor[i], currentFloor[j]]);
+    }
+  }
+
+  return itemPermutations;
 }
 
 function getNeighbouringFloors(state) {
@@ -62,28 +76,40 @@ function getPossibleNextStates(state) {
         return;
       }
 
-      // add to possible next states if the new state is valid
+      // finally lets increment the number of steps
+      newState['steps']++;
+
+      // we now know that this state is valid
+      // let's add it to list of possible states
+      possibleNextStates.push(newState);
     });
   });
 
   // return possible next states
+  return possibleNextStates;
 }
 
 function isValidFloor(floor) {
-  let generators = floor.reduce((acc, items) => {
-    if (item.charAt(1) === 'G') acc.push(item);
-    return acc;
-  });
-
-  let machines = floor.reduce((acc, items) => {
-    if (item.charAt(1) === 'M') acc.push(item);
+  let generators = floor.reduce((acc, item) => {
+    if (item.charAt(1) === 'G') acc.push(item.charAt(0));
     return acc;
   }, []);
 
+  let machines = floor.reduce((acc, item) => {
+    if (item.charAt(1) === 'M') acc.push(item.charAt(0));
+    return acc;
+  }, []);
+
+  // the machines/generators arrays are now just their corresponding letters
   // find out whether we have a machine without a generator
   // as well as another generator (the second gen will fry the chip)
-  let isInvalid = machines.some((item) => {
-    return !generators.contains(item.charAt(0) + 'G') && generators.length > 1;
+
+  let isInvalid = machines.some((machine) => {
+    if (!generators.includes(machine) && generators.length > 0){
+      return true;
+    } else {
+      return false;
+    }
   });
 
   return !isInvalid;
@@ -100,8 +126,9 @@ function serializeState(state) {
     state[i].sort(); // sorting state so that serialization will be the same regardless of order
     serializedString += 'F' + i;
     serializedString += state[i].reduce((acc, item) => {
-      return acc + ',' + item;
+      return acc + item;
     }, '');
+    serializedString += '-';
   }
 
   return serializedString;
