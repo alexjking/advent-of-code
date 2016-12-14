@@ -32,14 +32,14 @@ initialState['steps'] = 0;
 // // U = Curium
 // // R = Ruthenium
 // // T = Plutonium
-itemsCount = 14;
-initialState = {};
-initialState[0] = ['PG', 'PM', 'EG', 'EM', 'DG', 'DM'];
-initialState[1] = ['CG', 'UG', 'RG', 'TG' ];
-initialState[2] = ['CM', 'UM', 'RM', 'TM'];
-initialState[3] = [];
-initialState['elevator'] = 0;
-initialState['steps'] = 0;
+// itemsCount = 14;
+// initialState = {};
+// initialState[0] = ['PG', 'PM', 'EG', 'EM', 'DG', 'DM'];
+// initialState[1] = ['CG', 'UG', 'RG', 'TG' ];
+// initialState[2] = ['CM', 'UM', 'RM', 'TM'];
+// initialState[3] = [];
+// initialState['elevator'] = 0;
+// initialState['steps'] = 0;
 
 
 
@@ -141,32 +141,6 @@ function isValidFloor(floor) {
 
   return !isInvalid;
 }
-
-// function isValidFloor(floor) {
-//   let generators = floor.reduce((acc, item) => {
-//     if (item.charAt(1) === 'G') acc.push(item.charAt(0));
-//     return acc;
-//   }, []);
-
-//   let machines = floor.reduce((acc, item) => {
-//     if (item.charAt(1) === 'M') acc.push(item.charAt(0));
-//     return acc;
-//   }, []);
-
-//   // the machines/generators arrays are now just their corresponding letters
-//   // find out whether we have a machine without a generator
-//   // as well as another generator (the second gen will fry the chip)
-
-//   let isInvalid = machines.some((machine) => {
-//     if (!generators.includes(machine) && generators.length > 0){
-//       return true;
-//     } else {
-//       return false;
-//     }
-//   });
-
-//   return !isInvalid;
-// }
 
 function reachedFinalState(state) {
   return state[3].length === itemsCount;
