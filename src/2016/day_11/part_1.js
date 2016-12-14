@@ -9,7 +9,7 @@
 // initialState['elevator'] = 0;
 // initialState['steps'] = 0;
 
-
+// Part 1
 // P = Promethium
 // C = Cobalt
 // U = Curium
@@ -23,6 +23,24 @@ initialState[2] = ['CM', 'UM', 'RM', 'TM'];
 initialState[3] = [];
 initialState['elevator'] = 0;
 initialState['steps'] = 0;
+
+// Part 2
+// E = Elerium
+// D = Dilithium
+// // P = Promethium
+// // C = Cobalt
+// // U = Curium
+// // R = Ruthenium
+// // T = Plutonium
+// let itemsCount = 14;
+// let initialState = {};
+// initialState[0] = ['PG', 'PM', 'EG', 'EM', 'DG', 'DM'];
+// initialState[1] = ['CG', 'UG', 'RG', 'TG' ];
+// initialState[2] = ['CM', 'UM', 'RM', 'TM'];
+// initialState[3] = [];
+// initialState['elevator'] = 0;
+// initialState['steps'] = 0;
+
 
 
 function getItemPermutations(state) {
@@ -68,33 +86,26 @@ function getPossibleNextStates(state) {
   let possibleNextStates = [];
 
   // now generate the possible states given
-  neighbouringFloors.forEach((floor) => {
-    itemPermutations.forEach((items) => {
-      // create a new state
-      let newState = JSON.parse(JSON.stringify(state));
+  itemPermutations.forEach(items => {
+    let oldFloor = state['elevator'];
+    let oldFloorWithoutItems = state[oldFloor].filter(existingItem => items.indexOf(existingItem) === -1);
+    if (!isValidFloor(oldFloorWithoutItems)) return;
 
-      // remove the items from the current floor
-      let oldFloor = newState['elevator'];
-      newState[oldFloor] = newState[oldFloor].filter(item => items.indexOf(item) === -1);
+    neighbouringFloors.forEach(floor => {
+      let newNeighbourFloor = state[floor].concat(items);
+      if (!isValidFloor(newNeighbourFloor)) return;
 
-      // check if current floor state is valid
-      if (!isValidFloor(newState[oldFloor])) {
-        return;
-      }
-
-      // move the elevator to new position
+      // create a new state if the old floor and new floor are valid
+      let newState = {};
+      newState[oldFloor] = oldFloorWithoutItems;
+      newState[floor] = newNeighbourFloor;
       newState['elevator'] = floor;
-
-      // move items into the new floor;
-      newState[floor].push.apply(newState[floor], items);
-
-      // check if new floor state is valid
-      if (!isValidFloor(newState[floor])) {
-        return;
+      newState['steps'] = state['steps'] + 1;
+      for (let i = 0; i < 4; i++) {
+        if (newState[i] === undefined) {
+          newState[i] = JSON.parse(JSON.stringify(state[i]));
+        }
       }
-
-      // finally lets increment the number of steps
-      newState['steps']++;
 
       // we now know that this state is valid
       // let's add it to list of possible states
