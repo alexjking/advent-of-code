@@ -1,12 +1,29 @@
 'use strict';
+// DEMO STATES
+// let initialState = {};
+// let itemsCount = 4;
+// initialState[0] = ['HM', 'LM'];
+// initialState[1] = ['HG'];
+// initialState[2] = ['LG'];
+// initialState[3] = [];
+// initialState['elevator'] = 0;
+// initialState['steps'] = 0;
 
+
+// P = Promethium
+// C = Cobalt
+// U = Curium
+// R = Ruthenium
+// T = Plutonium
+let itemsCount = 10;
 let initialState = {};
-initialState[0] = ['HM', 'LM'];
-initialState[1] = ['HG'];
-initialState[2] = ['LG'];
+initialState[0] = ['PG', 'PM'];
+initialState[1] = ['CG', 'UG', 'RG', 'TG' ];
+initialState[2] = ['CM', 'UM', 'RM', 'TM'];
 initialState[3] = [];
 initialState['elevator'] = 0;
 initialState['steps'] = 0;
+
 
 function getItemPermutations(state) {
   // get current floor
@@ -117,7 +134,7 @@ function isValidFloor(floor) {
 
 
 function reachedFinalState(state) {
-  return state[3].length === 4;
+  return state[3].length === itemsCount;
 }
 
 function serializeState(state) {
@@ -135,6 +152,7 @@ function serializeState(state) {
 }
 
 
+// Part 1: Minimum number of moves is 33 steps.
 module.exports = (input) => {
   let stateCache = [];
   let stateQueue = [];
@@ -159,11 +177,6 @@ module.exports = (input) => {
     } else {
       stateCache[serializedState] = true;
     }
-
-    console.log(currentState);
-    console.log('');
-    console.log('');
-
 
     // if we haven't reached the final state
     // get all possible next states
