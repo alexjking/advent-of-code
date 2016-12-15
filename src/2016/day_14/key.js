@@ -4,8 +4,14 @@ const md5 = require('md5');
 
 module.exports = class Hash {
 
-  constructor(salt, number) {
+  constructor(salt, number, additionalHashes) {
     this.key = md5(salt + number);
+
+    if (!additionalHashes) additionalHashes = 0;
+
+    for (let i = 0; i < additionalHashes; i++) {
+      this.key = md5(this.key);
+    }
   }
 
   getFirstTriplet() {

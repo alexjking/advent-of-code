@@ -1,7 +1,7 @@
 'use strict';
 
 const Key = require('./key');
-
+const ADDITIONAL_HASH = 2016; // part 1: 0. part 2: 2016
 module.exports = (input) => {
   let salt = input[0];
 
@@ -10,17 +10,20 @@ module.exports = (input) => {
 
   // store the current potential keys and their invali
   let potentialKeys = [];
-  // let keyCharQueue = [];
-  // let keyExpirationQueue = [];
 
   while (keyIndexes.length < 64) {
+
+    if (index % 500 === 0) {
+      console.log(index);
+    }
     // generate the current key
-    let key = new Key(salt, index);
+    let key = new Key(salt, index, ADDITIONAL_HASH);
 
     // check if the current hash validates a previously found key
     let j = 0;
     while (j < potentialKeys.length) {
       if (key.containsFiveOfAKind(potentialKeys[j].char)) {
+        console.log('found hash', index, (potentialKeys[j].expiration - 1000))
         keyIndexes.push(potentialKeys[j].expiration - 1000);
         potentialKeys.splice(j, 1);
       } else {
@@ -58,5 +61,5 @@ module.exports = (input) => {
   //   console.log("Key " + (i+1) + " found at : " + keyIndexes[i]);
   // }
 
-  return keyIndexes[63]; // part 1: 15035
+  return keyIndexes[63]; // part 1: 15035; part 2: 19968
 }
