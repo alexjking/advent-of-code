@@ -32,14 +32,14 @@ initialState['steps'] = 0;
 // // U = Curium
 // // R = Ruthenium
 // // T = Plutonium
-// itemsCount = 14;
-// initialState = {};
-// initialState[0] = ['PG', 'PM', 'EG', 'EM', 'DG', 'DM'];
-// initialState[1] = ['CG', 'UG', 'RG', 'TG' ];
-// initialState[2] = ['CM', 'UM', 'RM', 'TM'];
-// initialState[3] = [];
-// initialState['elevator'] = 0;
-// initialState['steps'] = 0;
+itemsCount = 14;
+initialState = {};
+initialState[0] = ['PG', 'PM', 'EG', 'EM', 'DG', 'DM'];
+initialState[1] = ['CG', 'UG', 'RG', 'TG' ];
+initialState[2] = ['CM', 'UM', 'RM', 'TM'];
+initialState[3] = [];
+initialState['elevator'] = 0;
+initialState['steps'] = 0;
 
 
 
@@ -146,10 +146,7 @@ function reachedFinalState(state) {
   return state[3].length === itemsCount;
 }
 
-let cache0 = {};
-let cache1 = {};
-let cache2 = {};
-let cache3 = {};
+let cache = {};
 
 function serializeState(state) {
   let serializedString = '';
@@ -165,72 +162,65 @@ function serializeState(state) {
 }
 function checkCache(state) {
   let serializedString = serializeState(state);
-
-  switch(state['elevator']) {
-    case 0:
-      if (cache0[serializedString]) return true;
-      break;
-    case 1:
-      if (cache1[serializedString]) return true;
-      break;
-    case 2:
-      if (cache2[serializedString]) return true;
-      break;
-    case 3:
-      if (cache3[serializedString]) return true;
-      break;
+  if (cache[serializedString]) {
+    return true;
+  } else {
+    return false;
   }
-
-  return false;
 }
 
 function checkAndUpdateCache(state) {
   let serializedString = serializeState(state);
 
-  switch(state['elevator']) {
-    case 0:
-      if (cache0[serializedString]) {
-        return true;
-      } else {
-        cache0[serializedString] = true;
-      }
-      break;
-    case 1:
-      if (cache1[serializedString]) {
-        return true;
-      } else {
-        cache1[serializedString] = true;
-      }
-      break;
-    case 2:
-      if (cache2[serializedString]) {
-        return true;
-      } else {
-        cache2[serializedString] = true;
-      }
-      break;
-    case 3:
-      if (cache3[serializedString]) {
-        return true;
-      } else {
-        cache3[serializedString] = true;
-      }
-      break;
+  if (cache[serializedString]) {
+    return true;
+  } else {
+    cache[serializedString] = true;
   }
 
   return false;
 }
 
+/**
+ * Serialize state is the function where we can make the most optimizations.
+ * This controls how states are converted into keys for our state cache.
+ *
+ * The biggest optimization for this problem is to treat each machine/generator as a
+ * nameless pair. Names don't matter so we store the locations for each pair instead.
+ *
+ * This ends up pruning a significant amount of states.
+ *
+ * https://andars.github.io/aoc_day11.html
+ */
 function serializeState(state) {
-  let serializedString = 'E' + state['elevator'] + '-';
-  for (let i = 0; i <= 3; i++) {
-    state[i].sort(); // sorting state so that serialization will be the same regardless of order
-    serializedString += 'F' + i;
-    serializedString += state[i].reduce((acc, item) => {
-      return acc + item;
-    }, '');
-    serializedString += '-';
+  // get the list of machines
+  let machines = [];
+  for (let i = 0; i < 4; i++) {
+    state[i].forEach(item => {
+      if (item.charAt(1) === 'M') {
+        machines.push(item.charAt(0));
+      }
+    });
   }
+
+  let pairs = [];
+
+  // generate machine/generator floor index pairings
+  machines.forEach(machine => {
+    let pair = [];
+    for (let j = 0; j < 4; j++) {
+      if (state[j].includes(machine + 'M')) pair[0] = j;
+      if (state[j].includes(machine + 'G')) pair[1] = j;
+    }
+
+    pairs.push(pair);
+  });
+
+  // sort the pairings so that this key will always be the same
+  pairs.sort();
+
+  // create our serialized string using the elevator floor and the pairs
+  let serializedString = state['elevator'] + JSON.stringify(pairs);
 
   return serializedString;
 }
