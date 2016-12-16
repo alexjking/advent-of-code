@@ -33,7 +33,9 @@ function getCheckSum(str) {
 
 
 module.exports = (input) => {
-  const diskLength = 272;
+  // const diskLength = 272; // part 1 input.
+  const diskLength = 35651584; // part 2 input. Comment out to get answer for part 1.
+
   let randomData = generateRandomData(input[0], diskLength);
 
   let checkSum = getCheckSum(randomData.substring(0, diskLength));
@@ -43,5 +45,5 @@ module.exports = (input) => {
     checkSum = getCheckSum(checkSum);
   }
 
-  return checkSum; // part 1: 01110011101111011
+  return checkSum; // part 1: 01110011101111011 // part 2: 11001111011000111
 }
