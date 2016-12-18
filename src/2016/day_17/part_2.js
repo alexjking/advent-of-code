@@ -81,11 +81,12 @@ function getNextValidStates(state, salt) {
 }
 
 /**
- * A BFS to find the shortest path from the top left
- * of the maze to the bottom right of the maze.
+ * This is more or less a copy/paste of part 1,
+ * however this time we just store the longestPath
+ * whenever we encounter a solution that reaches the vault.
  *
- * Potentially could have done dijkstras instead, however
- * I just store the path in each state.
+ * As this is a BFS, it will terminate once all paths have been
+ * traversed.
  */
 module.exports = (input) => {
   let passcode = input[0];
@@ -96,12 +97,17 @@ module.exports = (input) => {
   let stateQueue = [];
   stateQueue.push(initialPosition);
 
+  // store the longest path
+  // update it every time we get a valid path
+  let longestPath = -1;
+
   while (stateQueue.length !== 0) {
     let currentState = stateQueue.shift();
 
     // check if we have reached the end
     if (hasReachedEnd(currentState)) {
-      return currentState[3];
+      longestPath = currentState[3].length;
+      continue;
     }
 
     // get a list of all of the next valid states
@@ -110,5 +116,5 @@ module.exports = (input) => {
     stateQueue = stateQueue.concat(nextStates);
   }
 
-  return null;
+  return longestPath;
 }
