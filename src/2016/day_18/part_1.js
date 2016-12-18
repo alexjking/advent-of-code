@@ -30,29 +30,26 @@ function getNumberOfSafeTiles(row) {
   }, 0);
 }
 
+/**
+ * This counts the number of traps based on an initial row of traps.
+ * There are a series of rules which dictate how the next row of traps
+ * should look like.
+ *
+ * input[0] is the first row
+ * input[1] is the number of rows we should generate
+ *
+ * @returns {Number} The number of safe tiles.
+ */
 module.exports = (input) => {
-  // . safe
-  // ^ traps in the fist row
-
-  // let test = '.^^^^';
-  // console.log(getNextTileRow(test));
-  // return;
-
-  // the type of tile (trapped or safe)
-  // depends on types of tile in the same position
-  // in the above row, and to either side of that popsition
-  // e.g. (row - 1, col) (row - 1, col - 1) (row - 1, col + 1)
-  // if off the end of the row, counts as safe
-
-
   let currentTileRow = input[0];
+  let maxRows = input[1] * 1;
 
   let tilesCount = getNumberOfSafeTiles(currentTileRow);
 
   // we've already started at the first row
   let i = 1;
 
-  while (i < 40) {
+  while (i < maxRows) {
     // get next tile row
     currentTileRow = getNextTileRow(currentTileRow);
 
