@@ -11,11 +11,8 @@ function getNextTileRow(lastRow) {
     let right = (i < (length - 1) && lastRow.charAt(i + 1) === '^');
 
     // rules to detect if current tile should be a trap
-    if ((left && center && !right) ||
-      (center && right && !left) ||
-      (left && !center && !right) ||
-    (right && !center && !left)) {
-        nextRow += '^';
+    if (left !== right) {
+      nextRow += '^';
     } else {
       nextRow += '.';
     }
