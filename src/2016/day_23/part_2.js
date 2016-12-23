@@ -10,7 +10,7 @@ module.exports = (input) => {
   });
 
   // we need to start off with 7n eggs in register a. Clue from the question.
-  registers['a'] = 7;
+  registers['a'] = 12;
 
   let getValueFromRegister = (word) => {
     if (registerNames.includes(word)) {
@@ -36,23 +36,24 @@ module.exports = (input) => {
   let i = 0;
   while (i < input.length) {
 
-    if (i === 4) {
-      registers['a'] = registers['b'] * registers['d'];
-      i = 10;
-      continue;
-    }
-
-
     let command = input[i];
     let commandArgs = command.split(' ');
 
-    if ((count % 50000) === 0) {
+    if ((count % 500000) === 0) {
       console.log(count, registers, command, i);
     }
     count++;
 
+
+    if (i === 4) {
+      registers['a'] = registers['b'] * registers['d'];
+      i = 10;
+      continue
+    }
+
     if (commandArgs[0] === 'cpy') {
       if (isValidRegisterOrNumber(commandArgs[1]) && isValidRegister(commandArgs[2])) {
+        //registers[commandArgs[2]] *= getValueFromRegister(commandArgs[1]);
         registers[commandArgs[2]] = getValueFromRegister(commandArgs[1]);
       }
 
