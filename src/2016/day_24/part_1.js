@@ -20,11 +20,10 @@ module.exports = (input) => {
 
   let shortestPathMatrix = graph.getShortestPathMatrix();
 
-
   let initialPathObj = {
     distance: 0,
     path: [0],
-    remaining: [1,2,3,4],
+    remaining: [1,2,3,4,5,6,7],
   };
 
   let results = [];
@@ -37,7 +36,6 @@ module.exports = (input) => {
 
     // if we have reached the end, add this to the results array
     if (currentPathObj.remaining.length === 0) {
-      // console.log('none remainign', currentPathObj.distance);
       results.push(JSON.parse(JSON.stringify(currentPathObj)));
       continue;
     }
@@ -69,5 +67,5 @@ module.exports = (input) => {
     }
   }, Infinity)
 
-  return minimumDistance;
+  return minimumDistance; // Part 1: 474
 }

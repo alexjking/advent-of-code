@@ -9,6 +9,7 @@ module.exports = class Graph {
 
     // generates a matrix containing the neighbours for each point
     this.neighbourMatrix = this.generateNeighboursMatrix();
+    console.log('Neighbour matrix');
 
     // generates a matrix of shortest path distances from a number
     // to each other number e.g. this.shortestPathMatrix[0][2]
@@ -26,41 +27,48 @@ module.exports = class Graph {
   generateShortestPaths() {
     let shortestPathMatrix = [];
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 8; i++) {
       let currentShortestPathArray = [];
 
       // lets get the root node
       let pos = this.getPosition(i);
-      pos.push({}); // lets push an empty object used for visited nodes
+      pos.push(0); // lets push an empty object used for visited nodes
 
       // create a queue
       let queue = [];
       queue.push(pos);
 
+      let visitedMap = {};
+
       // BFS until we've got all of the shortest paths
       while (queue.length > 0) {
         let currentPos = queue.shift();
+
+        // if we have visited the current position, skip, otherwise add to map
+        if (visitedMap[currentPos[0] + '::' + currentPos[1]] === true) {
+          continue;
+        } else {
+          visitedMap[currentPos[0] + '::' + currentPos[1]] = true;
+        }
+
+        // get the current value in the graph for this node
         let currentValue = this.graph[currentPos[0] * 1][currentPos[1] * 1];
 
         // if we hit a number, add it to shortest path matix
         if (currentValue !== '-' && currentValue !== '.' && currentValue !== '#') {
           if (currentShortestPathArray[currentValue * 1] == undefined) {
-            currentShortestPathArray[currentValue * 1] = Object.keys(currentPos[2]).length;
+            currentShortestPathArray[currentValue * 1] = currentPos[2];//Object.keys(currentPos[2]).length;
           }
         }
 
         // get neighbouring pairs, removing those which are
         let neighbours = JSON.parse(JSON.stringify(this.neighbourMatrix[currentPos[0] * 1][currentPos[1] * 1]));
 
-        // update the hashmap with visited nodes
-        let currentVisitedPaths = JSON.parse(JSON.stringify(currentPos[2]));
-        currentVisitedPaths[currentPos[0] +':' + currentPos[1]] = true;
-
         // lets filter neighbours we have already visited
         let unvisitedNeighbours = neighbours.filter(neighbourPair => {
-          return currentVisitedPaths[neighbourPair[0] +':' + neighbourPair[1]] !== true;
+          return visitedMap[neighbourPair[0] +'::' + neighbourPair[1]] !== true;
         }).map(neighbourPair => {
-          neighbourPair.push(currentVisitedPaths);
+          neighbourPair.push((currentPos[2] * 1) + 1);
           return neighbourPair;
         });
 
