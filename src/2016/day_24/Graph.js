@@ -19,6 +19,10 @@ module.exports = class Graph {
     console.log(this.shortestPathMatrix);
   }
 
+  getShortestPathMatrix() {
+    return this.shortestPathMatrix;
+  }
+
   generateShortestPaths() {
     let shortestPathMatrix = [];
 
