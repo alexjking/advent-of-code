@@ -39,6 +39,14 @@ module.exports = (input) => {
 
       if (nodeB.avail >= nodeA.used) {
         viablePairs++;
+
+        // print out any adjoining pairs which we can move
+        let xDiff = Math.abs(nodeA.x - nodeB.x);
+        let yDiff = Math.abs(nodeA.y - nodeB.y);
+
+        if (((xDiff < 2) && (yDiff === 0)) || ((yDiff < 2) && (xDiff === 0))) {
+          console.log('Node A', nodeA.x, nodeA.y, 'Node B', nodeB.x, nodeB.y);
+        }
       }
     }
   }
