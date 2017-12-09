@@ -8,6 +8,8 @@ module.exports = (input) => {
     let groups = 0;
     let isGarbage = false;
 
+    let garbageCharacters = 0;
+
     let groupOpening = 0;
 
     let i = 0;
@@ -15,6 +17,7 @@ module.exports = (input) => {
         if (stream[i] === '!') {
             i++;
         } else if (isGarbage && stream[i] !== '>') {
+            garbageCharacters++;
             // continue, we are currently in garbage territory
         } else if (isGarbage && stream[i] === '>') {
             isGarbage = false;
@@ -33,6 +36,8 @@ module.exports = (input) => {
  
         i++;
     }
+
+    console.log('Part 2: Garbage Characters', garbageCharacters);
 
     return groups;
 };
