@@ -60,11 +60,17 @@ module.exports = (input) => {
     let instructions = getInstructions(input);
     let registers = getRegisters(instructions);
 
+    let highestValue = -Infinity;
+
     _.forEach(instructions, (instruction) => {
         if (passCondition(instruction, registers)) {
             registers[instruction.register] += instruction.increment;
         }
+
+        highestValue = Math.max(highestValue, _.max(_.values(registers)));
     });
+
+    console.log('Highest value: ' + highestValue);
 
     return _.max(_.values(registers));
 };
