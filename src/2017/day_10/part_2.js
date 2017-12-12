@@ -1,60 +1,53 @@
 'use strict';
 
 const _ = require('lodash');
-
+const KnotHash = require('./knot_hash');
 const Part1 = require('./part_1');
 
 const getDenseHash = function(sparseHash) {
     let denseHashArray = [];
 
-    let i = 0;
-
-    while (i < sparseHash.length) {
-        let xor = sparseHash[i];
-        for (let j = 1; j < 16; j++) {
-            xor = xor ^ sparseHash[j];
-        }
-
-        denseHashArray.push(xor);
-        i += 16;
+    for (let i = 0; i < 16; i++) {
+        const o = sparseHash.slice(i * 16, i * 16 + 16).reduce((a, b) => a ^ b);
+        denseHashArray.push(o);
     }
 
     return denseHashArray;
-}
-
+};
 
 module.exports = (input) => {
-    // NOTE: this works according to basic test
+    // convert our input using asci values
     let lengths = _(input)
         .split('')
         .map(character => {
             return character.charCodeAt(0);
         })
         .value();
+
+    // add primes for randomness
     lengths = lengths.concat([17, 31, 73, 47, 23]);
-    console.log('lengths: ', lengths);
 
-    //////////////////////////
-    // TODO: make sure I trim any leading or trailing whitespace
-    //
+    // run the knot hash 64 times, preseving the skip size and current position
+    let sparseHashArr = _.times(256);
+    let currentPosition = 0;
+    let skipSize = 0;
+    for (let i = 0; i < 64; i++) {
+        let knotObject = KnotHash(sparseHashArr, lengths, currentPosition, skipSize);
+        sparseHashArr = knotObject.hashArr;
+        skipSize = knotObject.skipSize;
+        currentPosition = knotObject.currentPosition;
+    }
 
-    // NOTE: haven't tested this - not sure how to test this bit!!!
-    //       Have I got all the incrementing stuff done right???
-    let sparseHash = Part1(_.join(lengths), ',');
-    
-    // NOTE: this works according ot basic test
-    // let test = [65, 27, 9, 1, 4, 3, 40, 50, 91, 7, 6, 0, 2, 5, 68, 22];
-    let denseHashArray = getDenseHash(sparseHash);
-    console.log(denseHashArray);
+    // get dense hash
+    let denseHashArray = getDenseHash(sparseHashArr);
 
-    // NOTE: this works according to basic test
-    // denseHashArray = [64, 7, 255];
-    //convert from dense hash to hex
+    // convert from dense hash to hex string
     return _.reduce(denseHashArray, (memo, number) => {
         let hex = number.toString(16);
         if (hex.length === 1) {
             hex = '0' + hex;
         }
+
         return memo + hex;
     }, '');
 };
