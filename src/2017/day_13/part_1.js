@@ -1,11 +1,40 @@
 'use strict';
 
-module.exports = (input) => {
 
+const moveSecurityScanners = (layers) => {
+  Object.keys(layers).forEach(layerIndex => {
+    let layer = layers[layerIndex];
+    // cases if scanning is moving down
+    if (layer.direction === 'down') {
+      if (layer.position === (layer.range - 1)) {
+        layer.direction = 'up';
+        layer.position--;
+      } else {
+        layer.position++;
+      }
+    } else {
+      // cases if scanner is moving up
+      if (layer.position === 0) {
+        layer.direction = 'down';
+        layer.position++;
+      } else {
+        layer.position--;
+      }
+    }
+  });
+
+  return layers;
+}
+
+module.exports = (input, delayLength) => {
+  // give delayLength default if 0
+  if (delayLength === undefined) {
+    delayLength = 0;
+  }
+
+  // setup input
   let layers = {};
-
   let layerIndexes = [];
-
   for (let i = 0; i < input.length; i++) {
     let temp = input[i].split(':');
     let index = Number(temp[0]);
@@ -20,42 +49,26 @@ module.exports = (input) => {
     layerIndexes.push(index);
   }
 
-  let maxValue = layerIndexes.reduce((a,b) => Math.max(a, b));
+  // get max depth so we know how far to loop
+  let maxDepth = layerIndexes.reduce((a,b) => Math.max(a, b));
+
+  // lets delay our start, but move the secuirty scanners along
+  for (let i = 0; i < delayLength; i++) {
+    layers = moveSecurityScanners(layers);
+  }
+
   let severity = 0;
-
-  for (let depth = 0; depth <= maxValue; depth++) {
-    // console.log('----');
-    // console.log('depth', depth);
-    // console.log(layers);
-
-    // check if we are on a firewall with a range > 0
-    // add to severity if hit
+  for (let depth = 0; depth <= maxDepth; depth++) {
     let currentLayer = layers[depth];
-    if (currentLayer && currentLayer.position === 0) {
+
+    // check if we are on a firewall where the scanner is on the 0 position
+    // add to severity if hit
+    if (currentLayer && currentLayer.position == 0) {
       severity += depth * currentLayer.range;
     }
 
     // now move the security scanners
-    layerIndexes.forEach(layerIndex => {
-      let layer = layers[layerIndex];
-      // cases if scanning is moving down
-      if (layer.direction === 'down') {
-        if (layer.position === (layer.range - 1)) {
-          layer.direction = 'up';
-          layer.position--;
-        } else {
-          layer.position++;
-        }
-      } else {
-        // cases if scanner is moving up
-        if (layer.position === 0) {
-          layer.direction = 'down';
-          layer.position++;
-        } else {
-          layer.position--;
-        }
-      }
-    });
+    layers = moveSecurityScanners(layers);
   }
 
   return severity;
