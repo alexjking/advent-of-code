@@ -24,6 +24,7 @@ module.exports = (input) => {
   let row = 0;
   let col = 0;
   let direction = 'S';
+  let steps = 0;
 
   // find the starting coordinate
   for (let i = 0; i < grid[0].length; i++) {
@@ -57,10 +58,13 @@ module.exports = (input) => {
           col -= 1;
           break;
       }
+
+      // increment steps
+      steps++;
     }
 
     // set the new direction
-     if (direction === 'N' || direction === 'S') {
+    if (direction === 'N' || direction === 'S') {
       if (grid[row][col - 1] === '-' || grid[row][col - 1].match(/[a-z]/i)) {
         direction = 'W';
         col -= 1;
@@ -69,8 +73,9 @@ module.exports = (input) => {
         col += 1;
       } else {
         console.log('error v->h junction');
-      }
-     } else {
+        break;
+     }
+    } else {
       if (grid[row - 1][col] === '|' || grid[row - 1][col].match(/[a-z]/i)) {
         direction = 'N';
         row -= 1;
@@ -79,9 +84,17 @@ module.exports = (input) => {
         row += 1;
       } else {
         console.log('error h->v junction');
+        break;
       }
+
     }
+
+    // account for the step in the next direction
+    steps++;
   }
+
+  console.log('Part 1:', letters.join());
+  console.log('Part 2:', steps);
 
   return letters.join('');
 };
