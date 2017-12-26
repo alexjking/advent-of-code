@@ -87,9 +87,44 @@ module.exports = (input) => {
   });
 
   // find the bridge with the highest value
-  return sums.reduce((memo, sum) => {
+  let strongestBridgeStrength =  sums.reduce((memo, sum) => {
     return Math.max(memo, sum);
   }, 0);
 
   // answer: 1511, 37s
+  console.log('Part 1:', strongestBridgeStrength);
+
+  // lets find the list of longest bridges from the finished bridges
+  let longestBridges = finishedBridges.reduce((memo, bridge) => {
+    if (bridge.components.length > memo.length) {
+      memo = {
+        bridges: [bridge],
+        length: bridge.components.length,
+      };
+    } else if (bridge.components.length == memo.length) {
+      memo.bridges.push(bridge);
+    }
+
+    return memo;
+  }, {
+    bridges: [],
+    length: 0,
+  });
+
+  // lets get the strongest bridge from the set of longest bridges
+  let strongestLongestBridge = longestBridges.bridges.reduce((memo, bridge) => {
+    let bridgeStrength = bridge.getSum();
+    if (bridgeStrength > memo.strength) {
+      memo.bridge = bridge;
+      memo.strength = bridgeStrength;
+    }
+
+    return memo;
+  }, {
+    bridge: null,
+    strength: 0,
+  });
+
+  console.log('Part 2:', strongestLongestBridge.strength);
+  return strongestLongestBridge.strength;
 };
