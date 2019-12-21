@@ -37,3 +37,5 @@ module.exports = input => {
 
   return matches;
 }
+
+module.exports.ascendingDigits = ascendingDigits;
