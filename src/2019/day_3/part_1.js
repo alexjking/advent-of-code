@@ -22,20 +22,23 @@ function findVisited(pathInput) {
           break;
       }
 
+      acc.count++;
       const posStr = nextPos.x + ':' + nextPos.y;
-      acc.visited[posStr] = true;
+      acc.visited[posStr] = acc.count;
     }
 
     return {
       visited: acc.visited,
       pos: nextPos,
+      count: acc.count,
     };
   }, {
     visited: {},
     pos: {
       x: 0,
       y: 0,
-    }
+    },
+    count: 0,
   }).visited;
 }
 
@@ -48,13 +51,13 @@ module.exports = input => {
   const secondVisited = findVisited(secondPath);
 
   return Object.keys(firstVisited).reduce((minDistance, point) => {
-    if (secondVisited[point] === true) {
+    if (secondVisited.hasOwnProperty(point)) {
       const arr = point.split(':');
       const distance = Math.abs(Number(arr[0])) + Math.abs(Number(arr[1]));
       return Math.min(minDistance, distance);
     }
     return minDistance;
   }, 9999999999);
-
-  return 0;
 }
+
+module.exports.findVisited = findVisited;
