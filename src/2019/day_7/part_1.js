@@ -1,6 +1,6 @@
 'use strict';
 
-const computer = require('../computer');
+const Computer = require('../computer');
 
 // 46014
 module.exports = input => {
@@ -24,8 +24,10 @@ module.exports = input => {
             let lastOutput = 0;
             for (let i = 0; i < 5; i++) {
               const memory = input[0].split(',');
-              const result = computer(memory, null, null, [phase[i], lastOutput]);
-              lastOutput = Number(result.output[0]);
+
+              const comp = new Computer(memory);
+              const result =  comp.run([phase[i], lastOutput]);
+              lastOutput = Number(result[0]);
             }
 
             // record the max output seen so far

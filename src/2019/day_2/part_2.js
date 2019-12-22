@@ -1,6 +1,6 @@
 'use strict';
 
-const computer = require('../computer');
+const Computer = require('../computer');
 
 // 6421
 module.exports = inputs => {
@@ -9,8 +9,14 @@ module.exports = inputs => {
 
   for (let noun = 0; noun < 100; noun++) {
     for (let verb = 0; verb < 100; verb++) {
-      const val = computer(memory.slice(), noun, verb).memory[0];
-      if (val === target) {
+      const tempMemory = memory.slice();
+      tempMemory[1] = noun;
+      tempMemory[2] = verb;
+
+      const comp = new Computer(tempMemory);
+      comp.run([]);
+
+      if (comp.memory[0] === target) {
         return 100 * noun + verb;
       }
     }
