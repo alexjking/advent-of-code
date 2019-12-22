@@ -6,6 +6,10 @@ const OP = {
   MULTIPLY: 2,
   INPUT: 3,
   OUTPUT: 4,
+  JUMP_IF_TRUE: 5,
+  JUMP_IF_FALSE: 6,
+  LESS_THAN: 7,
+  EQUALS: 8,
 };
 
 function computer(memory, noun, verb, input) {
@@ -44,6 +48,44 @@ function computer(memory, noun, verb, input) {
           const multSaveIndex = memory[index + 3];
           const multVal = fetchValue(memory, index + 1, parameterMode1) * fetchValue(memory, index + 2, parameterMode2);
           memory[multSaveIndex] = multVal;
+          index += 4;
+          break;
+        case OP.JUMP_IF_TRUE:
+          const jitFirstValue = fetchValue(memory, index + 1, parameterMode1);
+          if (jitFirstValue !== 0) {
+            index = fetchValue(memory, index + 2, parameterMode2);
+          } else {
+            index += 3;
+          }
+          break;
+        case OP.JUMP_IF_FALSE:
+          const jifFirstValue = fetchValue(memory, index + 1, parameterMode1);
+          if (jifFirstValue === 0) {
+            index = fetchValue(memory, index + 2, parameterMode2);
+          } else {
+            index += 3;
+          }
+          break;
+        case OP.LESS_THAN:
+          const ltLeft = fetchValue(memory, index + 1, parameterMode1);
+          const ltRight = fetchValue(memory, index + 2, parameterMode2);
+          const ltSaveIndex = memory[index + 3];
+          if (ltLeft < ltRight) {
+            memory[ltSaveIndex] = 1;
+          } else {
+            memory[ltSaveIndex] = 0;
+          }
+          index += 4;
+          break;
+        case OP.EQUALS:
+          const equalsLeft = fetchValue(memory, index + 1, parameterMode1);
+          const equalsRight = fetchValue(memory, index + 2, parameterMode2);
+          const equalsSaveIndex = memory[index + 3];
+          if (equalsLeft === equalsRight) {
+            memory[equalsSaveIndex] = 1;
+          } else {
+            memory[equalsSaveIndex] = 0;
+          }
           index += 4;
           break;
         case OP.INPUT:
