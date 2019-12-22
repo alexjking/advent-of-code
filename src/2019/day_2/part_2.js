@@ -9,7 +9,7 @@ module.exports = inputs => {
 
   for (let noun = 0; noun < 100; noun++) {
     for (let verb = 0; verb < 100; verb++) {
-      const val = computer(memory.slice(), noun, verb)[0];
+      const val = computer(memory.slice(), noun, verb).memory[0];
       if (val === target) {
         return 100 * noun + verb;
       }

@@ -6,7 +6,7 @@ const computer = require('../computer');
 module.exports = inputs => {
   inputs = inputs.filter(input => input !== '').map(Number);
 
-  return computer(inputs, 12, 2, null)[0];
+  return computer(inputs, 12, 2, null).memory[0];
 };
 
 module.exports.computer = computer;
