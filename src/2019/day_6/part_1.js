@@ -1,36 +1,70 @@
 'use strict';
 
-
-function createTree(edges, label) {
-  if (!edges.hasOwnProperty(label)) {
-    return {
-      label,
-      children: [],
-    };
+class Node {
+  constructor(label, children, parent) {
+    this.label = label;
+    this.parent = parent;
+    this.children = children;
   }
 
-  return {
-    label,
-    children: edges[label].map(childLabel => {
-      return createTree(edges, childLabel);
-    }),
-  };
+  findOrbitsSum(depth) {
+    const childrenOrbits = this.children
+      .map(child => {
+        return child.findOrbitsSum(depth + 1);
+      })
+      .reduce((acc, sum) => {
+        return acc + sum;
+      }, 0);
+
+    // return sum of children orbits + orbits for this node
+    return childrenOrbits + depth;
+  }
+
+  height() {
+    let h = 0;
+    let node = this;
+    while (node.parent != null) {
+      h++;
+      node = node.parent;
+    }
+
+    return h;
+  }
+
+  find(label) {
+    if (this.label === label) {
+      return this;
+    }
+
+    for(let i = 0; i < this.children.length; i++) {
+      const result = this.children[i].find(label);
+
+      if (result != null) {
+        return result;
+      }
+    }
+
+    return null;
+  }
 }
 
-function findOrbitsSum(tree, depth) {
-  // find sum of indirect/direct orbits for children
-  const childrenOrbits = tree.children.reduce((sum, child) => {
-    return sum + findOrbitsSum(child, depth + 1);
-  }, 0);
+function createTree(edges, label, parent) {
+  if (!edges.hasOwnProperty(label)) {
+    return new Node(label, [], parent);
+  }
 
-  // return sum of children orbits + orbits for this node
-  return childrenOrbits + depth;
+  const currentNode = new Node(label, [], parent);
+
+  const children = edges[label].map(childLabel => {
+    return createTree(edges, childLabel, currentNode);
+  });
+
+  currentNode.children = children;
+  return currentNode;
 }
 
-// 119831
-module.exports = input => {
-  // generate a NodeLabel -> Array<NodeLabel> map
-  const edges = input
+function convertInputToEdgeMap(input) {
+  return input
     .filter(row => row !== '')
     .reduce((acc, row) => {
       const vals = row.split(')');
@@ -43,9 +77,20 @@ module.exports = input => {
       return acc;
     }, {});
 
+}
+
+// 119831
+module.exports = input => {
+  // generate a NodeLabel -> Array<NodeLabel> map
+  const edges = convertInputToEdgeMap(input);
+
   // create a tree
-  const tree = createTree(edges, 'COM');
+  const tree = createTree(edges, 'COM', null);
 
   // now find the number of direct and indrect orbits
-  return findOrbitsSum(tree, 0);
+  return tree.findOrbitsSum(0);
 };
+
+module.exports.Node = Node;
+module.exports.createTree = createTree;
+module.exports.convertInputToEdgeMap = convertInputToEdgeMap;
