@@ -17,6 +17,7 @@ module.exports = class Computer {
   constructor(memory) {
     this.memory = memory;
     this.index = 0;
+    this.end = false;
   }
 
   fetchValue(idx, immediateMode) {
@@ -25,6 +26,10 @@ module.exports = class Computer {
     } else {
       return Number(this.memory[this.memory[idx]]);
     }
+  }
+
+  hasEnded() {
+    return this.end;
   }
 
   run(input) {
@@ -87,6 +92,9 @@ module.exports = class Computer {
           this.index += 4;
           break;
         case OP.INPUT:
+          if (input.length === 0) {
+            return output;
+          }
           const inputVal = input.shift();
           this.memory[this.memory[this.index + 1]] = inputVal;
           this.index += 2;
@@ -97,6 +105,7 @@ module.exports = class Computer {
           this.index += 2;
           break;
         case OP.END:
+          this.end = true;
           return output;
         default:
           console.error('unexpected operator', this.memory[this.index]);
