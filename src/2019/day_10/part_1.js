@@ -1,9 +1,7 @@
 'use strict';
 
-// 299
-module.exports = input => {
-  // convert input into coords.
-  const asteroids = input.reduce((acc, row, yIndex) => {
+function convertInputToAsteroids(input) {
+  return input.reduce((acc, row, yIndex) => {
     if (row === '') {
       return acc;
     }
@@ -23,36 +21,71 @@ module.exports = input => {
 
     return acc.concat(rowCoords);
   }, []);
+}
 
-  // find the number of asteroids detected from each asteroid
-  const asteroidsDetected = asteroids.map(currentAsteroid => {
-    let lines = new Set();
-
-    asteroids.forEach(otherAsteroid => {
-      if (otherAsteroid === currentAsteroid) {
-        return;
-      }
-
-      // find line coeff, add to the lines set
-      const yDiff = currentAsteroid.y - otherAsteroid.y;
-      const xDiff = currentAsteroid.x - otherAsteroid.x;
-      const m = yDiff / xDiff;
-
-      // add the line coeff to the set (including the ydiff/xdiff to
-      // differentiate asteroids on the same line but different sides)
-      if (m === Infinity) {
-        lines.add(`x = ${currentAsteroid.x} xDiff=${Math.sign(xDiff)} yDiff=${Math.sign(yDiff)}`);
-      } else {
+function findLinesToOtherAsteroids(asteroids) {
+  return asteroids.map(currentAsteroid => {
+    const otherAsteroidLines = asteroids
+      .filter(asteroid => asteroid !== currentAsteroid)
+      .map(otherAsteroid => {
+        const yDiff = currentAsteroid.y - otherAsteroid.y;
+        const xDiff = otherAsteroid.x - currentAsteroid.x;
+        const m = yDiff / xDiff;
         const c = currentAsteroid.y - (m * currentAsteroid.x);
-        lines.add(`y = ${String(m)}x + ${String(c)} xDiff=${Math.sign(xDiff)} yDiff=${Math.sign(yDiff)}`);
+        const distance = Math.sqrt(Math.pow(yDiff, 2) + Math.pow(xDiff, 2));
+        return {
+          otherAsteroid,
+          m,
+          c,
+          yDiff,
+          xDiff,
+          distance,
+        };
+      });
+
+    return {
+      asteroid: currentAsteroid,
+      lines: otherAsteroidLines,
+    };
+  });
+}
+
+// 299
+module.exports = input => {
+  // convert input into coords.
+  const asteroids = convertInputToAsteroids(input);
+
+  const asteroidsToOtherAsteroids = findLinesToOtherAsteroids(asteroids);
+
+  const asteroidsDetected = asteroidsToOtherAsteroids.map(currentAsteroidObj => {
+    let uniqueLines = new Set();
+
+    currentAsteroidObj.lines.forEach(otherAsteroid => {
+      if (otherAsteroid.m === Infinity) {
+        uniqueLines.add(`x = ${currentAsteroidObj.asteroid.x} xDiff=${Math.sign(otherAsteroid.xDiff)} yDiff=${Math.sign(otherAsteroid.yDiff)}`);
+      } else {
+        const c = currentAsteroidObj.asteroid.y - (currentAsteroidObj.asteroid.m * currentAsteroidObj.asteroid.x);
+        uniqueLines.add(`y = ${String(otherAsteroid.m)}x + ${String(otherAsteroid.c)} xDiff=${Math.sign(otherAsteroid.xDiff)} yDiff=${Math.sign(otherAsteroid.yDiff)}`);
       }
     });
 
-    return lines.size;
+    return {
+      asteroid: currentAsteroidObj.asteroid,
+      directHits: uniqueLines.size,
+      lines: currentAsteroidObj.lines
+    };
   });
 
   // find the highest number of asteroids detected
   return asteroidsDetected.reduce((max, val) => {
-    return Math.max(max, val);
-  }, -1);
+    if (max.directHits > val.directHits) {
+      return max;
+    } else {
+      return val;
+    }
+  }, {
+    asteroid: null,
+    directHits: -1,
+    lines: null,
+  });
 }
