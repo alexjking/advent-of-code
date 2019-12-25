@@ -10,11 +10,12 @@ const D = {
 };
 
 class HullPainter {
-  constructor() {
+  constructor(startPanelColour) {
     this.hull = {}
     this.x = 0;
     this.y = 0;
     this.direction = D.NORTH;
+    this.paintHull(startPanelColour);
   }
 
   getKey() {
@@ -98,11 +99,46 @@ class HullPainter {
         throw 'Invalid direction';
     }
   }
+
+  printHull() {
+    // find ranges for x and y coordinates
+    const ranges = Object.keys(this.hull).reduce((acc, panelKey) => {
+      const [x, y] = panelKey.split(':');
+      return {
+        minX: Math.min(acc.minX, Number(x)),
+        minY: Math.min(acc.minY, Number(y)),
+        maxX: Math.max(acc.maxX, Number(x)),
+        maxY: Math.max(acc.maxY, Number(y)),
+      };
+    }, {minX: Infinity, minY: 0, maxX: 0, maxY: 0});
+
+    const xRange = ranges.maxX - ranges.minX;
+    const yRange = ranges.maxY - ranges.minY;
+
+    // create an empty grid for x and y range
+    const result = [];
+    for (let y = 0; y <= yRange; y++) {
+      result.push(Array(xRange + 1).fill(' '));
+    }
+
+    // loop through painted panels, painting white panels in the grod
+    Object.entries(this.hull).forEach(([k, value]) => {
+      const [x, y] = k.split(':');
+
+      if (value === 1) {
+        result[y - ranges.minY][x - ranges.minX] = '#';
+      }
+    });
+
+    return result
+      .reverse()
+      .map(row => row.join(''));
+  }
 }
 
 // 2319
 module.exports = input => {
-  const painter = new HullPainter();
+  const painter = new HullPainter(0);
   const computer = new Computer(input[0].split(','));
 
   while (!computer.hasEnded()) {
@@ -115,3 +151,5 @@ module.exports = input => {
 
   return Object.keys(painter.hull).length;
 }
+
+module.exports.HullPainter = HullPainter;
