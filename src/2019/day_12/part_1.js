@@ -85,3 +85,5 @@ module.exports = input => {
     .map(moon => moon.getTotalEnergy())
     .reduce((acc, energy) => acc + energy);
 }
+
+module.exports.Moon = Moon;
