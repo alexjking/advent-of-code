@@ -111,7 +111,9 @@ function calculateNextStep(area, x, y) {
     tempy.value !== '.' &&
     tempy.value !== '%' &&
     typeof tempy.value !== 'number' &&
-    tempy.value !== 'v'
+    tempy.value !== 'v' &&
+    tempy.value !== '*'
+
   );
 
   if (temp.length === 0) {
@@ -153,7 +155,7 @@ function findMoveToPreviousStep(area, x, y, counter) {
   return temp2[0];
 }
 
-// 240
+// 322
 module.exports = input => {
 
   const computer = new Computer(input[0].split(','));
@@ -176,12 +178,15 @@ module.exports = input => {
     if (input === undefined) {
       counter = counter - 1;
 
+      if (counter === 1) {
+        break;
+      }
+
       // backtrack, including dodgy indexing
-      while (calculateNextStep(area, x, y) === undefined) {
+      while (calculateNextStep(area, x, y) === undefined && counter > 1) {
         if (area[`${x}:${y}`] !== '*') {
           area[`${x}:${y}`] = 'v';
-        }
-        const lastStep = findMoveToPreviousStep(area, x, y, counter);
+        }        const lastStep = findMoveToPreviousStep(area, x, y, counter);
         const nextPos = getNextPosition(lastStep.move, x, y);
         x = nextPos.x;
         y = nextPos.y;
@@ -211,10 +216,77 @@ module.exports = input => {
     } else if (status === STATUS.MOVED_AND_HIT) {
       // mark the oxygen tank and return
       area[`${nextPos.x}:${nextPos.y}`] = '*';
-      printHull(area);
-      return counter;
+      x = nextPos.x;
+      y = nextPos.y;
+      counter++;
     } else {
       throw 'Invalid output status' + output;
     }
+  }
+
+  printHull(area);
+
+  // find oxygen
+  const [originX, originY] = Object.entries(area).filter(([key, value]) => {
+    return value === '*';
+  })[0][0].split(':').map(Number);
+  console.log('key', originX, originY);
+
+  function getKey(point) {
+    return `${point.x}:${point.y}`;
+  }
+
+  let oxygenTime = 0;
+  let points = [{x: originX, y: originY}];
+  while (points.length > 0) {
+    const newPoints = [];
+    points.forEach(point => {
+      const pointValue = getValue(area, point.x, point.y);
+      if (pointValue !== '' && pointValue !== '#' && pointValue !== 'O') {
+        // mark as visited
+        area[getKey(point)] = 'O';
+
+        // add valid neighbours to newPoints
+        let a = getValue(area, point.x, point.y - 1);
+        if (a !== '' && a !== '#' && a !== 'O') {
+          newPoints.push({
+            x: point.x,
+            y: point.y - 1,
+          });
+        }
+        a = getValue(area, point.x, point.y + 1);
+        if (a !== '' && a !== '#' && a !== 'O') {
+          newPoints.push({
+            x: point.x,
+            y: point.y + 1,
+          });
+        }
+
+        a = getValue(area, point.x + 1, point.y);
+        if (a !== '' && a !== '#' && a !== 'O') {
+          newPoints.push({
+            x: point.x + 1,
+            y: point.y,
+          });
+        }
+        a = getValue(area, point.x - 1, point.y);
+        if (a !== '' && a !== '#' && a !== 'O') {
+          newPoints.push({
+            x: point.x - 1,
+            y: point.y,
+          });
+        }
+      }
+    });
+
+    // termination condition
+    if (newPoints.length === 0) {
+      printHull(area);
+      console.log('time', oxygenTime);
+      return oxygenTime;
+    }
+
+    points = newPoints;
+    oxygenTime++;
   }
 }
