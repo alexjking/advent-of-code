@@ -21,13 +21,13 @@ function getRequiredOre2(mineral, amount, spec, level) {
   const stillNeed = amount - spareAvailable;
   console.log(`${pad}Still need ${amount - spareAvailable} ${mineral}`);
 
-  const reactions = Math.ceil(stillNeed / (mineral === 'ORE' ? 1 : spec[mineral].amountProvided));
-  const produced = reactions * (mineral === 'ORE' ? 1 : spec[mineral].amountProvided);
+  // use Math.ceil because we need whole numbers
+  const reactions = Math.ceil(stillNeed / spec[mineral].amountProvided);
+  const produced = reactions * spec[mineral].amountProvided;
   console.log(`${pad}${reactions} reactions will produce ${produced} ${mineral}`);
   const spareRemaining = spareAvailable + produced - amount;
   console.log(`${pad}Leaving ${spareRemaining} spare`);
 
-  // spares - will this be subject to a race condition?
   spares[mineral] = spareRemaining;
 
   // requirements
@@ -41,13 +41,8 @@ function getRequiredOre2(mineral, amount, spec, level) {
   return coalRequired;
 }
 
-
-// I'm not quite sure what is going wrong.
-// This is very confusing, something to do with spares is going wrong.
-
-module.exports = input => {
-
-  const requirementsSpec = input
+function genRequirementsSpec(input) {
+  return input
     .filter(line => line !== '')
     .reduce((acc, line) => {
       const [left, right] = line.split('=>');
@@ -69,12 +64,11 @@ module.exports = input => {
         }
       };
     }, {});
-
-  console.log(JSON.stringify(requirementsSpec));
-
-  const result = getRequiredOre2('FUEL', 1, requirementsSpec, 0);
-
-  console.log(result);
-  console.log('SPARE', spares);
-  return result;
 }
+
+module.exports = input => {
+  const requirementsSpec = genRequirementsSpec(input);
+  return getRequiredOre2('FUEL', 1, requirementsSpec, 0);
+}
+
+module.exports.genRequirementsSpec = genRequirementsSpec;
