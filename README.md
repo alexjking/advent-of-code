@@ -3,6 +3,6 @@
 Solutions for advent of code challenges using JS/ES6.
 
 - [x] 2016
-- [ ] 2017
+- [x] 2017
 - [ ] 2018
 - [ ] 2019
