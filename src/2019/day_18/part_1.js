@@ -4,10 +4,14 @@ function getKey(node) {
   return `${node.y}:${node.x}`;
 }
 
+function getCacheKey(node) {
+  return node.y + ':' + node.x + ':' + node.keys.sort().join('');
+}
+
 const neighbouringKeysCache = {};
 
-function fetchFromCache(node) {
-  const key = node.y + ':' + node.x + ':' + node.keys.sort().join('');
+function fetchNeighboursFromCache(node) {
+  const key = getCacheKey(node);
   if (neighbouringKeysCache.hasOwnProperty(key)) {
     return neighbouringKeysCache[key];
   } else {
@@ -15,13 +19,13 @@ function fetchFromCache(node) {
   }
 }
 
-function saveToCache(node, neighbours) {
-  const key = node.y + ':' + node.x + ':' + node.keys.sort().join('');
+function saveNeighboursToCache(node, neighbours) {
+  const key = getCacheKey(node);
   neighbouringKeysCache[key] = neighbours;
 }
 
 function getNeighbouringKeys(area, rootNode) {
-  const cache = fetchFromCache(rootNode);
+  const cache = fetchNeighboursFromCache(rootNode);
   if (cache !== null) {
     return cache;
   }
@@ -103,7 +107,7 @@ function getNeighbouringKeys(area, rootNode) {
     distance++;
   }
 
-  saveToCache(rootNode, keyNodes);
+  saveNeighboursToCache(rootNode, keyNodes);
   return keyNodes;
 }
 
@@ -150,43 +154,52 @@ function findNumberOfKeys(area) {
   }, 0);
 }
 
+const remainingDistanceCache = {};
+
+function fetchRemainingDistanceFromCache(node) {
+  const key = getCacheKey(node);
+  if (remainingDistanceCache.hasOwnProperty(key)) {
+    return remainingDistanceCache[key];
+  } else {
+    return null;
+  }
+}
+
+function saveRemainingDistanceToCache(node, result) {
+  const key = getCacheKey(node);
+  remainingDistanceCache[key] = result;
+}
+
+// 4590 took 2 minutes 43 seconds
 module.exports = input => {
   const area = convertInputToArea(input);
   const entrance = findEntrance(area);
   const numKeys = findNumberOfKeys(area);
 
-  const completedNodes = [];
-  let nodes = [entrance];
-  while (nodes.length > 0) {
-    let nextNodes = [];
-    let alex2 = 0;
-    while (nodes.length > 0) {
-      // check if we've completed, we should store distance somewhere
-      const currentNode = nodes.pop();
-      if (currentNode.keys.length === numKeys) {
-        completedNodes.push(currentNode);
-        continue;
-      }
-
-      // otherwise, we should find all the neighbouring keys that we can access
-      // and continue search
-      const neighbouringKeys = getNeighbouringKeys(area, currentNode);
-      nextNodes = nextNodes.concat(neighbouringKeys.map(el => {
-        return {
-          ...el,
-          distance: el.distance + currentNode.distance,
-        };
-      }));
+  function recurse(node) {
+    // base case
+    if (node.keys.length === numKeys) {
+      return node.distance;
     }
 
-    nodes = nextNodes;
+    // check cache
+    const remainingDistanceCacheResult = fetchRemainingDistanceFromCache(node);
+    if (remainingDistanceCacheResult !== null) {
+      return remainingDistanceCacheResult + node.distance;
+    }
+
+    // calculate remaining distance from this point onwards
+    const neighbouringKeys = getNeighbouringKeys(area, node);
+    const minimumRemainingDistance = neighbouringKeys.map(el => {
+      return recurse(el);
+    }).reduce((acc, distance) => {
+      return Math.min(acc, distance);
+    }, Infinity);
+
+    // save to cache and return
+    saveRemainingDistanceToCache(node, minimumRemainingDistance);
+    return minimumRemainingDistance + node.distance;
   }
 
-  return completedNodes.reduce((acc, el) => {
-    if (el.distance < acc.distance) {
-      return el;
-    } else {
-      return acc;
-    }
-  }, {distance: Infinity});
+  return recurse(entrance);
 }
