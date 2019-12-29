@@ -5,110 +5,110 @@ function getKey(node) {
 }
 
 function getCacheKey(node) {
-  return node.y + ':' + node.x + ':' + node.keys.sort().join('');
+  const positions = node.nodes.map(el => {
+    return el.y + ':' + el.x;
+  }).join(',');
+
+  return positions + ':' + node.keys.concat().sort().join(',');
 }
 
-const neighbouringKeysCache = {};
-
-function fetchNeighboursFromCache(node) {
-  const key = getCacheKey(node);
-  if (neighbouringKeysCache.hasOwnProperty(key)) {
-    return neighbouringKeysCache[key];
-  } else {
-    return null;
-  }
-}
-
-function saveNeighboursToCache(node, neighbours) {
-  const key = getCacheKey(node);
-  neighbouringKeysCache[key] = neighbours;
-}
-
-function getNeighbouringKeys(area, rootNode) {
-  const cache = fetchNeighboursFromCache(rootNode);
-  if (cache !== null) {
-    return cache;
-  }
-
-  let keyNodes = [];
-  let nodes = [rootNode];
+function getNextStates(area, state) {
+  let keyStates = [];
+  let states = [state];
   const visitedCoords = new Set();
   let distance = 0;
 
-  function isInvalid(checkingNode) {
+  function isInvalid(position) {
     return (// within bounds
-      checkingNode.y < 0 ||
-      checkingNode.y >= area.length ||
-      checkingNode.x < 0 ||
-      checkingNode.x >= area[0].length ||
+      position.y < 0 ||
+      position.y >= area.length ||
+      position.x < 0 ||
+      position.x >= area[0].length ||
       // not a wall
-      area[checkingNode.y][checkingNode.x] === '#' ||
+      area[position.y][position.x] === '#' ||
       // we haven't visited this yet
-      visitedCoords.has(getKey(checkingNode)) ||
+      visitedCoords.has(getKey(position)) ||
       // we counter a door without a key
       (
-        area[checkingNode.y][checkingNode.x] !== '@' &&
-        area[checkingNode.y][checkingNode.x] !== '.' &&
-        area[checkingNode.y][checkingNode.x] === area[checkingNode.y][checkingNode.x].toUpperCase() &&
-        !rootNode.keys.includes(area[checkingNode.y][checkingNode.x].toLowerCase())
+        area[position.y][position.x] !== '@' &&
+        area[position.y][position.x] !== '.' &&
+        area[position.y][position.x] === area[position.y][position.x].toUpperCase() &&
+        !state.keys.includes(area[position.y][position.x].toLowerCase())
       )
     );
   }
 
-  while(nodes.length > 0) {
-    let tempNodes = [];
-    while (nodes.length > 0) {
-      const node = nodes.pop();
+  while(states.length > 0) {
+    let tempStates = [];
+    while (states.length > 0) {
+      const tempState = states.pop();
 
-      // check if node is invalid
-      if (isInvalid(node)) {
-        continue;
-      }
+      // loop through each node
+      for (let sector = 0; sector < tempState.nodes.length; sector++) {
+        let position = tempState.nodes[sector];
 
-      // mark current node as visited
-      visitedCoords.add(getKey(node));
+        // check if node is invalid
+        if (isInvalid(position)) {
+          continue;
+        }
 
-      // check if we have a key, add it if we find one
-      if (
-        area[node.y][node.x] !== '.' &&
-        area[node.y][node.x] !== '@' &&
-        area[node.y][node.x] === area[node.y][node.x].toLowerCase() &&
-        !rootNode.keys.includes(area[node.y][node.x])
-      ) {
-        keyNodes.push({
-          ...node,
-          distance: distance,
-          keys: rootNode.keys.concat([area[node.y][node.x]]),
+        // mark current node as visited
+        visitedCoords.add(getKey(position));
+
+        // check if we have a key, add it if we find one
+        if (
+          area[position.y][position.x] !== '.' &&
+          area[position.y][position.x] !== '@' &&
+          area[position.y][position.x] === area[position.y][position.x].toLowerCase() &&
+          !state.keys.includes(area[position.y][position.x])
+        ) {
+          keyStates.push({
+            ...tempState,
+            distance: distance,
+            keys: state.keys.concat([area[position.y][position.x]]),
+          });
+          continue;
+        }
+
+        const neighbourPositions = [{
+            x: position.x,
+            y: position.y + 1,
+          },
+          {
+            x: position.x,
+            y: position.y - 1,
+          },
+          {
+            x: position.x + 1,
+            y: position.y,
+          },
+          {
+            x: position.x - 1,
+            y: position.y,
+          },
+        ];
+
+        const validNeighbourPositions = neighbourPositions.filter(el => !isInvalid(el));
+
+        // now we need to create a load of states for the neighbours
+        const nextStates = validNeighbourPositions.map((neighbourPosition) => {
+          const myNewNodes =  {
+            nodes: [...tempState.nodes],
+          };
+          myNewNodes.nodes[sector] = neighbourPosition;
+          return myNewNodes;
         });
-      }
 
-      // add neighbours
-      const neighbours = [{
-          x: node.x,
-          y: node.y + 1,
-        },
-        {
-          x: node.x,
-          y: node.y - 1,
-        },
-        {
-          x: node.x + 1,
-          y: node.y,
-        },
-        {
-          x: node.x - 1,
-          y: node.y,
-        },
-      ];
-      tempNodes = tempNodes.concat(neighbours.filter(el => !isInvalid(el)));
+        // add valid neighbours
+        tempStates = tempStates.concat(nextStates);
+      }
     }
 
-    nodes = tempNodes;
+    states = tempStates;
     distance++;
   }
 
-  saveNeighboursToCache(rootNode, keyNodes);
-  return keyNodes;
+  return keyStates;
 }
 
 function convertInputToArea(input) {
@@ -122,19 +122,23 @@ function convertInputToArea(input) {
 }
 
 function findEntrance(area) {
-  let entrance = null;
+  const nodes = [];
   area.forEach((row, y) => {
     row.forEach((el, x) => {
       if (el === "@") {
-        entrance = {
+        nodes.push({
           x,
           y,
-          keys: [],
-          distance: 0,
-        }
+        });
       }
     });
   });
+
+  return {
+    nodes,
+    keys: [],
+    distance: 0,
+  }
 
   if (entrance != null) {
     return entrance;
@@ -170,7 +174,6 @@ function saveRemainingDistanceToCache(node, result) {
   remainingDistanceCache[key] = result;
 }
 
-// 4590 took 2 minutes 43 seconds
 module.exports = input => {
   const area = convertInputToArea(input);
   const entrance = findEntrance(area);
@@ -189,8 +192,8 @@ module.exports = input => {
     }
 
     // calculate remaining distance from this point onwards
-    const neighbouringKeys = getNeighbouringKeys(area, node);
-    const minimumRemainingDistance = neighbouringKeys.map(el => {
+    const nextStates = getNextStates(area, node);
+    const minimumRemainingDistance = nextStates.map(el => {
       return recurse(el);
     }).reduce((acc, distance) => {
       return Math.min(acc, distance);
