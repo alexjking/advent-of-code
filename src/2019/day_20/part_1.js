@@ -1,18 +1,20 @@
 'use strict';
 
-function getKey(x, y) {
-  return y + ':' + x;
+function getKey(x, y, z) {
+  return y + ':' + x + ':' + z;
 }
 
 class Node {
-  constructor(x, y) {
+  constructor(x, y, level) {
     this.x = x;
     this.y = y;
+    this.level = level != null ? level : 0;
+    this.label = null;
     this.children = [];
   }
 
   getKey() {
-    return getKey(this.x, this.y);
+    return getKey(this.x, this.y, this.level);
   }
 }
 
@@ -30,7 +32,7 @@ class Maze {
     this.nodes = this.area.reduce((acc, row, y) => {
       row.forEach((el, x) => {
         if (el === '.') {
-          acc[getKey(x,y)] = new Node(x, y);
+          acc[getKey(x,y,0)] = new Node(x, y);
         }
       });
 
@@ -43,7 +45,7 @@ class Maze {
 
       // find children next
       const children = this.getNeighbourPositionIncrement()
-        .map(pos => getKey(node.x + pos.x, node.y + pos.y))
+        .map(pos => getKey(node.x + pos.x, node.y + pos.y, 0))
         .map(key => {
           if (this.nodes.hasOwnProperty(key)) {
             return this.nodes[key];
@@ -57,7 +59,11 @@ class Maze {
     });
 
     // find the portals in the grid
-    this.portalSourceMap = Object.keys(this.nodes).reduce((acc, nodeKey) => {
+    this.portalSourceMap = this._createPortalSourceMap();
+  }
+
+  _createPortalSourceMap() {
+    return Object.keys(this.nodes).reduce((acc, nodeKey) => {
       const node = this.nodes[nodeKey];
 
       const neighbourLabels = this.getNeighbourPositionIncrement()
@@ -73,32 +79,49 @@ class Maze {
       if (neighbourLabels.length > 0) {
         const neighbourLabel = neighbourLabels[0];
         if (!acc.hasOwnProperty(neighbourLabel)) {
-          acc[neighbourLabel] = [];
+          acc[neighbourLabel] = {
+            down: null,
+            up: null,
+          };
         }
-        acc[neighbourLabel].push(node);
+
+        // now to find out which level this one is.
+        if (
+          (node.x < 3 || node.x >= this.area[2].length - 3) ||
+          (node.y < 3 || node.y >= this.area.length - 3)
+        ) {
+          acc[neighbourLabel].up = node;
+        } else {
+          acc[neighbourLabel].down = node;
+        }
+
+        // let's add the label to the node itself
+        node.label = neighbourLabel;
       }
 
       return acc;
     }, {});
+  }
 
+  addPortalConnectionsAsNeighbours() {
     // add portal connections as children in our graph
     Object.keys(this.portalSourceMap).forEach(portalKey => {
       const portalNodes = this.portalSourceMap[portalKey];
-      if (portalNodes.length !== 2) {
+      if (portalNodes.down == null) {
         return;
       }
 
-      portalNodes[1].children.push(portalNodes[0]);
-      portalNodes[0].children.push(portalNodes[1]);
+      portalNodes.down.children.push(portalNodes.up);
+      portalNodes.up.children.push(portalNodes.down);
     });
   }
 
   getEntryNode() {
-    return this.portalSourceMap['AA'][0]
+    return this.portalSourceMap['AA'].up
   }
 
   getExitNode() {
-    return this.portalSourceMap['ZZ'][0];
+    return this.portalSourceMap['ZZ'].up;
   }
 
   getNeighbourPositionIncrement() {
@@ -126,6 +149,7 @@ class Maze {
 module.exports = input => {
 
   const maze = new Maze(input);
+  maze.addPortalConnectionsAsNeighbours();
 
   // BFS to find shortest distance
   const entryNode = maze.getEntryNode();
@@ -162,3 +186,6 @@ module.exports = input => {
 
   return "Not found";
 }
+
+module.exports.Node = Node;
+module.exports.Maze = Maze;
